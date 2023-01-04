@@ -1,44 +1,42 @@
 ﻿Console.WriteLine("========= Exercício 5 - Desafio 1 =========");
 
-var input = File.ReadAllLines("input.txt");
+var input        = File.ReadAllText("input.txt");
+var dividedInput = input.Split("\n\n");
 
-var numParesIneficientes = 0;
+var topCrate = new List<char>();
 
-foreach(var line in input)
+var inputCrates = dividedInput[0].Split('\n');
+var commands    = dividedInput[1].Split('\n');
+
+var crates = new Stack<char>[9];
+
+for (var i = 0; i < 9; i++)
 {
-    var pares = line.Split(',');
-
-    var (par1Area1, par1Area2) = ValoresIntervalo(pares[0]);
-    var (par2Area1, par2Area2) = ValoresIntervalo(pares[1]);
-
-    var listaPar1 = new List<int>();
-    var listaPar2 = new List<int>();
-
-    for(var i = par1Area1; i <= par1Area2; i++)
-    {
-        listaPar1.Add(i);
-    }
-
-    for(var i = par2Area1; i <= par2Area2; i++)
-    {
-        listaPar2.Add(i);
-    }
-    
-    var temPar = listaPar1
-        .Where(l => listaPar2.Contains(l))
-        .Any();
-    
-    if(temPar)
-        numParesIneficientes += 1;
+    crates[i] = new Stack<char>();
 }
 
-Console.WriteLine($"O número de pares ineficientes é: {numParesIneficientes}");
+//int cratesIndex = 0;
 
-(int, int) ValoresIntervalo(string intervalo)
+for(var i = inputCrates.Length - 2; i >= 0; i--)
 {
-    var par  = intervalo.Split('-');
-    var num1 = int.Parse(par[0]);
-    var num2 = int.Parse(par[1]);
+    for(var cratesIndex = 0; cratesIndex < crates.Length; cratesIndex++)
+    {
+        var index = (4 * cratesIndex) + 1; 
+        var letra = inputCrates[i][index];
 
-    return (num1, num2);
+        if(letra != ' ')
+            crates[cratesIndex].Push(letra);
+    }
 }
+
+foreach(var command in commands)
+{
+    
+}
+
+foreach(var crate in crates)
+{
+    topCrate.Add(crate.Peek());
+}
+
+Console.WriteLine(new string(topCrate.ToArray()));
