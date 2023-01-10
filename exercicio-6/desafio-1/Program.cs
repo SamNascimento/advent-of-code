@@ -6,9 +6,9 @@ var cleanInput = input.Replace("\r", "");
 
 var indexOfStart = 0;
 
-for (var i = 3; i < input.Length; i++)
+for (var i = 3; i < cleanInput.Length; i++)
 {
-    var hashString = input.Substring(i-3, 4);
+    var hashString = cleanInput.Substring(i-3, 4);
     var sizeOfHash = hashString.Distinct().Count();
 
     if (sizeOfHash == 4)
