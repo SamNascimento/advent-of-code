@@ -31,7 +31,7 @@ void Ler(Node node, IEnumerable<string> lines)
 
             if (line.Contains(".."))
             {
-                Ler(node.parent, lines.Skip(1));
+                Ler(node.parent!, lines.Skip(1));
             }
             else
             {
@@ -78,15 +78,6 @@ Node? BuscarNode(Node root, string dirName)
         .child
         .Where(n => n.dirName == dirName)
         .FirstOrDefault();
-
-    // if (searchNode != null)
-    //     return searchNode;
-    
-    // if (searchNode == null && root.child.Any())
-    // {
-    //     foreach (var child in root.child)
-    //         searchNode = BuscarNode(child, dirName);
-    // }
 
     return searchNode;
 }
@@ -140,7 +131,7 @@ class Node
     public Node(string name, bool isDirectory, Node? nodeParent, long size = 0)
     {
         dirName = name;
-        dirSize = isDirectory ? child.Select(n => n.dirSize).Sum() : size;
+        dirSize = size;
         isDir   = isDirectory;
         parent  = nodeParent;
     }
