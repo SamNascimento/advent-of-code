@@ -31,7 +31,11 @@ void Read(Node node, IEnumerable<string> lines)
         {
             var dirName = line.Replace("$ cd ", "");
 
-            if (line.Contains(".."))
+            if (dirName == "/")
+            {
+                Read(rootNode, lines.Skip(1));
+            }
+            else if (line.Contains(".."))
             {
                 Read(node.parent!, lines.Skip(1));
             }
