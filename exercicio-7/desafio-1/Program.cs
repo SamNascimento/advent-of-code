@@ -3,10 +3,10 @@
 var input = File.ReadAllLines("test.txt");
 // var input = File.ReadAllLines("input.txt");
 
-var rootNode  = new Node("/", true, null);
+var rootNode = new Node("/", true, null);
 
-Ler(rootNode, input);
-EscreverArvore(rootNode);
+Read(rootNode, input);
+WriteTree(rootNode);
 
 var nodeList = new List<Node>();
 nodeList     = Under100ThousandNodeSize(rootNode, nodeList);
@@ -16,7 +16,9 @@ var sizeOfDirUnder100Thousand = nodeList.Select(n => n.dirSize).Sum();
 Console.WriteLine("The total size of Dir under 100 Thousand is: " + sizeOfDirUnder100Thousand);
 
 
-void Ler(Node node, IEnumerable<string> lines) 
+#region Functions
+
+void Read(Node node, IEnumerable<string> lines) 
 {
     if (!lines.Any()) 
         return;
@@ -31,7 +33,7 @@ void Ler(Node node, IEnumerable<string> lines)
 
             if (line.Contains(".."))
             {
-                Ler(node.parent!, lines.Skip(1));
+                Read(node.parent!, lines.Skip(1));
             }
             else
             {
@@ -41,16 +43,16 @@ void Ler(Node node, IEnumerable<string> lines)
                 {
                     var newNode = new Node(dirName, true, node);
                     node.child.Add(newNode);
-                    Ler(newNode, lines.Skip(1));
+                    Read(newNode, lines.Skip(1));
                 }
                 else
                 {
-                    Ler(searchNode, lines.Skip(1));
+                    Read(searchNode, lines.Skip(1));
                 }
             }
         }
         else if (line.Contains("ls"))
-            Ler(node, lines.Skip(1));
+            Read(node, lines.Skip(1));
     }
     else if (line.StartsWith("dir"))
     {
@@ -58,7 +60,7 @@ void Ler(Node node, IEnumerable<string> lines)
 
         var newNode = new Node(dirName, true, node);
         node.child.Add(newNode);
-        Ler(node, lines.Skip(1));
+        Read(node, lines.Skip(1));
     }
     else if (char.IsNumber(line[0]))
     {
@@ -68,7 +70,7 @@ void Ler(Node node, IEnumerable<string> lines)
 
         var newNode = new Node(fileName, false, node, fileSize);
         node.child.Add(newNode);
-        Ler(node, lines.Skip(1));
+        Read(node, lines.Skip(1));
     }
 }
 
@@ -82,7 +84,7 @@ Node? BuscarNode(Node root, string dirName)
     return searchNode;
 }
 
-void EscreverArvore(Node root, int spc = 0)
+void WriteTree(Node root, int spc = 0)
 {
     var spaces = new String(' ', spc);
 
@@ -92,7 +94,7 @@ void EscreverArvore(Node root, int spc = 0)
         Console.WriteLine($"{spaces}- {root.dirName} (file, size={root.dirSize})");
 
     foreach (var child in root.child)
-        EscreverArvore(child, spc+2);
+        WriteTree(child, spc+2);
 }
 
 List<Node> Under100ThousandNodeSize(Node root, List<Node> nodeList)
@@ -120,6 +122,9 @@ long Size(Node root)
     return nodeSize;
 }
 
+#endregion
+
+#region Class
 class Node
 { 
     public string dirName;
@@ -146,3 +151,4 @@ class Node
         this.child.Add(new Node(name, false, parent, size));
     }
 }
+#endregion
