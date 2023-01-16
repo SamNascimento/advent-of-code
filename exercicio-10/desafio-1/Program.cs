@@ -6,7 +6,7 @@ var input = File.ReadAllLines("input.txt");
 var x     = 1;
 var listX = new List<int>();
 
-var actionType  = enumActionType.read;
+var actionType  = EnumActionType.read;
 var execNumber  = 0;
 var actualCycle = 1;
 int[] keyCycles = {20, 60, 100, 140, 180, 220};
@@ -16,7 +16,7 @@ for (var i=0; i < input.Length; i++)
     if (keyCycles.Contains(actualCycle))
         listX.Add(actualCycle * x);
 
-    if (actionType == enumActionType.read)
+    if (actionType == EnumActionType.read)
     {
         if (input[i].Contains("noop"))
         {
@@ -26,7 +26,7 @@ for (var i=0; i < input.Length; i++)
         
         var line   = input[i].Split(' ');
         execNumber = int.Parse(line[1]);
-        actionType = enumActionType.execute;
+        actionType = EnumActionType.execute;
         
         actualCycle ++;
         i --;      
@@ -34,7 +34,7 @@ for (var i=0; i < input.Length; i++)
     else
     {
         x += execNumber;
-        actionType = enumActionType.read;
+        actionType = EnumActionType.read;
         
         actualCycle ++;
     }
@@ -44,7 +44,7 @@ Console.WriteLine("The sum of X value in 20th, 60th, 100th, 140th, 180th, and 22
 Console.WriteLine(listX.Sum());
 
 #region Enums
-public enum enumActionType
+public enum EnumActionType
 {
     read = 0,
     execute
