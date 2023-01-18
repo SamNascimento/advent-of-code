@@ -49,7 +49,7 @@ Console.WriteLine($"The location of initial E is X: {E.Cordenates.X} Y: {E.Corde
 var visitedCoord = new List<Cordenates>();
 var allRoutesFound = BruteForceFindRoute(map, S, E, 0, visitedCoord);
 
-var shorterRoute = allRoutesFound.Where(r => r.IsComplete).Min(r => r.Steps);
+var shorterRoute = allRoutesFound.Min();
 Console.WriteLine($"The fewest steps required is: " + shorterRoute);
 
 #region Methods
@@ -68,7 +68,7 @@ void DrawMap(char[,] map)
     }
 }
 
-List<Routes> BruteForceFindRoute(
+List<long> BruteForceFindRoute(
     char[,] map, 
     RemarkablePosition S, 
     RemarkablePosition E, 
@@ -76,16 +76,14 @@ List<Routes> BruteForceFindRoute(
     List<Cordenates> visitedCordenates)
 {
     var visitedCoord = new List<Cordenates>();
-    var routes       = new List<Routes>();
+    var routes       = new List<long>();
 
     visitedCoord.AddRange(visitedCordenates);
     visitedCoord.Add(new Cordenates(S.Cordenates.X, S.Cordenates.Y));
 
     if (S.Cordenates.Y == E.Cordenates.Y && S.Cordenates.X == E.Cordenates.X)
     {
-        var newRouteTrue = new Routes(count, true);
-
-        routes.Add(newRouteTrue);
+        routes.Add(count);
         return routes;
     }
 
@@ -146,9 +144,8 @@ List<Routes> BruteForceFindRoute(
             }
         }
     }
-
-    var newRouteFalse = new Routes(count, false);
-    routes.Add(newRouteFalse);
+    
+    visitedCoord.Clear();
 
     return routes;
 }
@@ -164,18 +161,6 @@ class RemarkablePosition
     {
         this.Name       = name;
         this.Cordenates = cordenates;
-    }
-}
-
-class Routes 
-{
-    public long Steps { get; set; }
-    public bool IsComplete { get; set; }
-
-    public Routes(long steps, bool isComplete)
-    {
-        this.Steps      = steps;
-        this.IsComplete = isComplete;
     }
 }
 
