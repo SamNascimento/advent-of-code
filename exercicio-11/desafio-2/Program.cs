@@ -5,7 +5,7 @@ Console.WriteLine("========= Exercício 11 - Desafio 2 =========");
 // var input = File.ReadAllText("test.txt");
 var input = File.ReadAllText("input.txt");
 
-var inputMonkeys     = input.Split("\n\n");
+var inputMonkeys     = input.Replace("\r", "").Split("\n\n");
 var listMonkeys      = new List<Monkey>();
 var divisibleNumbers = new List<BigInteger>();
 var numOfRounds      = 10000;
@@ -114,11 +114,6 @@ class Monkey
     public void AddNewItem(BigInteger item)
     {
         Itens.Add(item);
-    }
-
-    public void RemoveItem(BigInteger item)
-    {
-        Itens.Remove(item);
     }
     
     public void IncrementInspections()
