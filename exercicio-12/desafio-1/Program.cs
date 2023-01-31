@@ -1,193 +1,156 @@
 ﻿Console.WriteLine("========= Exercício 12 - Desafio 1 =========");                  
  
-// var input = File.ReadAllLines("test.txt");
-var input = File.ReadAllLines("input.txt");
+var input = File.ReadAllLines("test.txt");
+// var input = File.ReadAllLines("input.txt");
 
 var x = input[0].Length;
 var y = input.Length;
 
-var S = new RemarkablePosition("S", new Cordenates(0, 0));
-var E = new RemarkablePosition("E", new Cordenates(0, 0));
+var inputMapped = MapInput(input, y, x);
+var allPosition = FindNeighbors(inputMapped, y, x).ToList();
 
-var actualX = 0;
-var actualY = 0;
+var source = allPosition.Where(r => r.Name == 'S').First();
 
-var map = new char[y, x];
+Dijkstra(allPosition, source);
 
-for (var i = 0; i < y; i++)
-{
-    for (var j = 0; j < x; j++)
-    {
-        var charAtual = input[i][j];
+var smallDistanceTarget = allPosition.Where(r => r.Name == 'E').First();
 
-        if (charAtual == 'S')
-        {
-            S.Cordenates.X = actualX;
-            S.Cordenates.Y = actualY;
-            charAtual = 'a';
-        }
-        else if (charAtual == 'E')
-        {
-            E.Cordenates.X = actualX;
-            E.Cordenates.Y = actualY;
-            charAtual = 'z';
-        }
-
-        map[actualY, actualX] = charAtual;
-        if (actualX < x-1)
-            actualX ++;
-    }
-    actualY ++;
-    actualX = 0;
-}
-
-DrawMap(map);
-
-Console.WriteLine($"The location of initial S is X: {S.Cordenates.X} Y: {S.Cordenates.Y}");
-Console.WriteLine($"The location of initial E is X: {E.Cordenates.X} Y: {E.Cordenates.Y}");
-
-var visitedCoord = new List<Cordenates>();
-var allRoutesFound = BruteForceFindRoute(map, S, E, 0, visitedCoord);
-
-var shorterRoute = allRoutesFound.Where(r => r.IsComplete).Min(r => r.Steps);
-Console.WriteLine($"The fewest steps required is: " + shorterRoute);
+Console.WriteLine("The small distance to reach your target is: " + smallDistanceTarget.SmallDistance);
 
 #region Methods
-void DrawMap(char[,] map)
+Dictionary<(int y, int x), Position> MapInput(string[] input, int y, int x)
 {
-    var xLimit = map.GetLength(1);
-    var yLimit = map.GetLength(0);
+    var dictPosition = new Dictionary<(int y, int x), Position>();
 
-    for (var y = 0; y < yLimit; y ++)
+    for (var i = 0; i < y; i++)
     {
-        for (var x = 0; x < xLimit; x++)
+        for (var j = 0; j < x; j++)
         {
-            Console.Write(map[y, x]);
+            var currentChar = input[i][j];
+            var elevation   = Elevation(currentChar);
+            var neighbors   = new List<Position>();
+
+            var position = new Position(currentChar, elevation, neighbors);
+
+            dictPosition.Add((i, j), position);
         }
-        Console.Write('\n');
     }
+
+    return dictPosition;
 }
 
-List<Routes> BruteForceFindRoute(
-    char[,] map, 
-    RemarkablePosition S, 
-    RemarkablePosition E, 
-    int count, 
-    List<Cordenates> visitedCordenates)
+IEnumerable<Position> FindNeighbors (Dictionary<(int y, int x), Position> inputMapped, int y, int x)
 {
-    var visitedCoord = new List<Cordenates>();
-    var routes       = new List<Routes>();
-
-    visitedCoord.AddRange(visitedCordenates);
-    visitedCoord.Add(new Cordenates(S.Cordenates.X, S.Cordenates.Y));
-
-    if (S.Cordenates.Y == E.Cordenates.Y && S.Cordenates.X == E.Cordenates.X)
+    for (var i = 0; i < y; i++)
     {
-        var newRouteTrue = new Routes(count, true);
-
-        routes.Add(newRouteTrue);
-        return routes;
-    }
-
-    var actualGroundS = map[S.Cordenates.Y, S.Cordenates.X];
-
-    if (S.Cordenates.Y != 0)
-    {   
-        //Up
-        if (map[S.Cordenates.Y - 1, S.Cordenates.X] <= actualGroundS + 1)
+        for (var j = 0; j < x; j++)
         {
-            if (!visitedCoord.Any(v => v.Y == S.Cordenates.Y - 1 && v.X == S.Cordenates.X))
-            {
-                var newS = new RemarkablePosition("S", new Cordenates(S.Cordenates.X, S.Cordenates.Y - 1));
+            var currentPosition = inputMapped.GetValueOrDefault((i,j));
 
-                routes.AddRange(BruteForceFindRoute(map, newS, E, count + 1, visitedCoord));
+            //Up
+            if((i - 1) >= 0)
+            {
+                var upPosition = inputMapped.GetValueOrDefault((i-1,j));
+
+                if (currentPosition!.Elevation <= upPosition!.Elevation + 1)
+                    currentPosition.ValidNeighbors.Add(upPosition);
+            }
+
+            //Down
+            if((i + 1) <= (y - 1))
+            {
+                var downPosition = inputMapped.GetValueOrDefault((i+1,j));
+
+                if (currentPosition!.Elevation <= downPosition!.Elevation + 1)
+                    currentPosition.ValidNeighbors.Add(downPosition);
+            }
+
+            //Left
+            if((j - 1) >= 0)
+            {
+                var leftPosition = inputMapped.GetValueOrDefault((i,j-1));
+
+                if (currentPosition!.Elevation <= leftPosition!.Elevation + 1)
+                    currentPosition.ValidNeighbors.Add(leftPosition);
+            }
+
+            //Right
+            if((j + 1) <= (x - 1))
+            {
+                var rightPosition = inputMapped.GetValueOrDefault((i,j+1));
+
+                if (currentPosition!.Elevation <= rightPosition!.Elevation + 1)
+                    currentPosition.ValidNeighbors.Add(rightPosition);
             }
         }
     }
 
-    if (S.Cordenates.Y < map.GetLength(0) - 1)
-    {
-        //Down
-        if (map[S.Cordenates.Y + 1, S.Cordenates.X] <= actualGroundS + 1)
-        {
-            if (!visitedCoord.Any(v => v.Y == S.Cordenates.Y + 1 && v.X == S.Cordenates.X))
-            {
-                var newS = new RemarkablePosition("S", new Cordenates(S.Cordenates.X, S.Cordenates.Y + 1));
+    return inputMapped.AsEnumerable().Select(d => d.Value);
+}
 
-                routes.AddRange(BruteForceFindRoute(map, newS, E, count + 1, visitedCoord));
+int Elevation(char currentChar)
+{
+    var elevation = -1;
+    
+    if (currentChar == 'S')
+    {
+        elevation = 'a' - 'a';
+    }
+    else if (currentChar == 'E')
+    {
+        elevation = 'z' - 'a';
+    }
+    else
+    {
+        elevation = currentChar - 'a';
+    }
+
+    return elevation;
+}
+
+void Dijkstra(List<Position> allPosition, Position source)
+{
+    source.SmallDistance = 0;
+
+    while(allPosition.Any(a => a.WasVisited == false))
+    {
+        var currentPosition         = allPosition.Where(a => a.WasVisited == false).MinBy(a => a.SmallDistance);
+        currentPosition!.WasVisited = true;
+
+        foreach (var neighbors in currentPosition!.ValidNeighbors)
+        {
+            if (!neighbors.WasVisited)
+            {
+                var newDistance = currentPosition!.SmallDistance + 1;
+
+                if (newDistance < neighbors.SmallDistance)
+                {
+                    neighbors.SmallDistance    = newDistance;
+                    neighbors.PreviousPosition = currentPosition;
+                }
             }
         }
     }
-
-    if (S.Cordenates.X != 0)
-    {
-        //Left
-        if (map[S.Cordenates.Y, S.Cordenates.X - 1] <= actualGroundS + 1)
-        {
-            if (!visitedCoord.Any(v => v.Y == S.Cordenates.Y && v.X == S.Cordenates.X - 1))
-            {
-                var newS = new RemarkablePosition("S", new Cordenates(S.Cordenates.X - 1, S.Cordenates.Y));
-
-                routes.AddRange(BruteForceFindRoute(map, newS, E, count + 1, visitedCoord));
-            }
-        }
-    }
-
-    if (S.Cordenates.X < map.GetLength(1) - 1)
-    {
-        //Right
-        if (map[S.Cordenates.Y, S.Cordenates.X + 1] <= actualGroundS + 1)
-        {
-            if (!visitedCoord.Any(v => v.Y == S.Cordenates.Y && v.X == S.Cordenates.X + 1))
-            {
-                var newS = new RemarkablePosition("S", new Cordenates(S.Cordenates.X + 1, S.Cordenates.Y));
-
-                routes.AddRange(BruteForceFindRoute(map, newS, E, count + 1, visitedCoord));
-            }
-        }
-    }
-
-    var newRouteFalse = new Routes(count, false);
-    routes.Add(newRouteFalse);
-
-    return routes;
 }
 #endregion
 
 #region Classes
-class RemarkablePosition
+class Position
 {
-    public string Name { get; set; }
-    public Cordenates Cordenates { get; set; }
+    public char Name { get; set; }
+    public int Elevation { get; set; }
+    public List<Position> ValidNeighbors { get; set; }
+    public int SmallDistance { get; set; }
+    public bool WasVisited { get; set; }
+    public Position? PreviousPosition { get; set; }
 
-    public RemarkablePosition(string name, Cordenates cordenates)
+    public Position(char name, int elevation, List<Position> validNeighbors)
     {
-        this.Name       = name;
-        this.Cordenates = cordenates;
-    }
-}
-
-class Routes 
-{
-    public long Steps { get; set; }
-    public bool IsComplete { get; set; }
-
-    public Routes(long steps, bool isComplete)
-    {
-        this.Steps      = steps;
-        this.IsComplete = isComplete;
-    }
-}
-
-class Cordenates
-{
-    public int X { get; set; }
-    public int Y { get; set; }
-
-    public Cordenates(int x, int y)
-    {
-        this.X = x;
-        this.Y = y;
+        this.Name           = name;
+        this.Elevation      = elevation;
+        this.ValidNeighbors = validNeighbors;
+        this.SmallDistance  = int.MaxValue;
+        this.WasVisited     = false;
     }
 }
 #endregion
