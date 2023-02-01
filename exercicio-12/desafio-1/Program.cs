@@ -1,21 +1,21 @@
 ﻿Console.WriteLine("========= Exercício 12 - Desafio 1 =========");                  
  
-var input = File.ReadAllLines("test.txt");
-// var input = File.ReadAllLines("input.txt");
+// var input = File.ReadAllLines("test.txt");
+var input = File.ReadAllLines("input.txt");
 
 var x = input[0].Length;
 var y = input.Length;
 
 var inputMapped = MapInput(input, y, x);
-var allPosition = FindNeighbors(inputMapped, y, x).ToList();
+var allPositions = FindNeighbors(inputMapped, y, x);
 
-var source = allPosition.Where(r => r.Name == 'S').First();
+var source = allPositions.Where(r => r.Name == 'S').First();
 
-Dijkstra(allPosition, source);
+Dijkstra(allPositions, source);
 
-var smallDistanceTarget = allPosition.Where(r => r.Name == 'E').First();
+var smallDistanceTarget = allPositions.Where(r => r.Name == 'E').First().SmallDistance;
 
-Console.WriteLine("The small distance to reach your target is: " + smallDistanceTarget.SmallDistance);
+Console.WriteLine("The small distance to reach your target is: " + smallDistanceTarget);
 
 #region Methods
 Dictionary<(int y, int x), Position> MapInput(string[] input, int y, int x)
@@ -52,7 +52,7 @@ IEnumerable<Position> FindNeighbors (Dictionary<(int y, int x), Position> inputM
             {
                 var upPosition = inputMapped.GetValueOrDefault((i-1,j));
 
-                if (currentPosition!.Elevation <= upPosition!.Elevation + 1)
+                if (upPosition!.Elevation <= currentPosition!.Elevation + 1)
                     currentPosition.ValidNeighbors.Add(upPosition);
             }
 
@@ -61,7 +61,7 @@ IEnumerable<Position> FindNeighbors (Dictionary<(int y, int x), Position> inputM
             {
                 var downPosition = inputMapped.GetValueOrDefault((i+1,j));
 
-                if (currentPosition!.Elevation <= downPosition!.Elevation + 1)
+                if (downPosition!.Elevation <= currentPosition!.Elevation + 1)
                     currentPosition.ValidNeighbors.Add(downPosition);
             }
 
@@ -70,7 +70,7 @@ IEnumerable<Position> FindNeighbors (Dictionary<(int y, int x), Position> inputM
             {
                 var leftPosition = inputMapped.GetValueOrDefault((i,j-1));
 
-                if (currentPosition!.Elevation <= leftPosition!.Elevation + 1)
+                if (leftPosition!.Elevation <= currentPosition!.Elevation + 1)
                     currentPosition.ValidNeighbors.Add(leftPosition);
             }
 
@@ -79,7 +79,7 @@ IEnumerable<Position> FindNeighbors (Dictionary<(int y, int x), Position> inputM
             {
                 var rightPosition = inputMapped.GetValueOrDefault((i,j+1));
 
-                if (currentPosition!.Elevation <= rightPosition!.Elevation + 1)
+                if (rightPosition!.Elevation <= currentPosition!.Elevation + 1)
                     currentPosition.ValidNeighbors.Add(rightPosition);
             }
         }
@@ -108,14 +108,17 @@ int Elevation(char currentChar)
     return elevation;
 }
 
-void Dijkstra(List<Position> allPosition, Position source)
+void Dijkstra(IEnumerable<Position> allPositions, Position source)
 {
     source.SmallDistance = 0;
 
-    while(allPosition.Any(a => a.WasVisited == false))
+    while(allPositions.Any(a => a.WasVisited == false))
     {
-        var currentPosition         = allPosition.Where(a => a.WasVisited == false).MinBy(a => a.SmallDistance);
+        var currentPosition         = allPositions.Where(a => a.WasVisited == false).MinBy(a => a.SmallDistance);
         currentPosition!.WasVisited = true;
+
+        if (currentPosition!.Name == 'E')
+            break;
 
         foreach (var neighbors in currentPosition!.ValidNeighbors)
         {
