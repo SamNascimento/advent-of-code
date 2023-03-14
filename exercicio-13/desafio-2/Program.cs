@@ -16,7 +16,7 @@ var result = parsedInput.SelectMany(x => x)
                    .Select(x => x.pos)
                    .Aggregate((a, b) => a * b);
 
-Console.WriteLine($"The sum of the indices of those pairs: {result}");
+Console.WriteLine($"The multiplication of the index of divisors is: {result}");
 
 #region Methods
 static IEnumerable<ImmutableArray<ListItem>> ParseInput(IEnumerable<string> input)
