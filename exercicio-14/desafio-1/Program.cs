@@ -25,7 +25,10 @@ var maxY = map.nodes.Select(n => n.y).Max();
 
 map = FillAirInMap(map, minX, maxX, minY, maxY);
 
+var numSand = SandResting(map);
+DrawnMap(map, minX, maxX, minY, maxY);
 
+Console.WriteLine("Units of sand: " + numSand);
 
 #region Methods
 CaveMap ConstructMap (CaveMap map, string begin, string end)
@@ -45,16 +48,26 @@ CaveMap ConstructMap (CaveMap map, string begin, string end)
         {
             for (int i = beginX; i <= endX; i++)
             {
-                var newNode = new Node(i, beginY, '#');
-                map.nodes.Add(newNode);
+                var nodeExist = map.nodes.Where(n => n.x == i && n.y == beginY).FirstOrDefault() != null;
+
+                if (!nodeExist)
+                {
+                    var newNode = new Node(i, beginY, '#');
+                    map.nodes.Add(newNode);
+                }
             }
         }
         else 
         {
             for (int i = endX; i <= beginX; i++)
             {
-                var newNode = new Node(i, beginY, '#');
-                map.nodes.Add(newNode);
+                var nodeExist = map.nodes.Where(n => n.x == i && n.y == beginY).FirstOrDefault() != null;
+
+                if (!nodeExist)
+                {
+                    var newNode = new Node(i, beginY, '#');
+                    map.nodes.Add(newNode);
+                }
             }
         }
     }
@@ -65,16 +78,26 @@ CaveMap ConstructMap (CaveMap map, string begin, string end)
         {
             for (int i = beginY; i <= endY; i++)
             {
-                var newNode = new Node(beginX, i, '#');
-                map.nodes.Add(newNode);
+                var nodeExist = map.nodes.Where(n => n.x == beginX && n.y == i).FirstOrDefault() != null;
+
+                if (!nodeExist)
+                {
+                    var newNode = new Node(beginX, i, '#');
+                    map.nodes.Add(newNode);
+                }
             }
         }
         else 
         {
             for (int i = endY; i <= beginY; i++)
             {
-                var newNode = new Node(beginX, i, '#');
-                map.nodes.Add(newNode);
+                var nodeExist = map.nodes.Where(n => n.x == beginX && n.y == i).FirstOrDefault() != null;
+
+                if (!nodeExist)
+                {
+                    var newNode = new Node(beginX, i, '#');
+                    map.nodes.Add(newNode);
+                }
             }
         }
     }
@@ -137,21 +160,43 @@ int SandResting(CaveMap map)
             }
             else
             {
-                var leftSandSpot  = map.nodes.Where(n => n.x == nextSandSpot.x - 1 && n.y == nextSandSpot.y + 1).FirstOrDefault();
-                var rightSandSpot = map.nodes.Where(n => n.x == nextSandSpot.x + 1 && n.y == nextSandSpot.y + 1).FirstOrDefault();
+                var leftSandSpot  = map.nodes.Where(n => n.x == nextSandSpot.x - 1 && n.y == nextSandSpot.y).FirstOrDefault();
+                var rightSandSpot = map.nodes.Where(n => n.x == nextSandSpot.x + 1 && n.y == nextSandSpot.y).FirstOrDefault();
 
                 if (leftSandSpot == null)
                 {
+                    isSandResting  = true;
+                    actualNode.obj = '.';
                     return (true, map);
                 }
                 else if (leftSandSpot.obj == '.')
                 {
+                    nextSandSpot   = map.nodes.Where(n => n.x == leftSandSpot.x && n.y == leftSandSpot.y).First();
                     actualNode.obj = '.';
                     actualNode     = map.nodes.Where(n => n.x == nextSandSpot.x && n.y == nextSandSpot.y).First();
                     actualNode.obj = 'o';
     
                     nextSandSpot = map.nodes.Where(n => n.x == nextSandSpot.x && n.y == nextSandSpot.y + 1).FirstOrDefault();
                 }
+                else if (rightSandSpot == null)
+                {
+                    isSandResting  = true;
+                    actualNode.obj = '.';
+                    return (true, map);
+                }
+                else if (rightSandSpot.obj == '.')
+                {
+                    nextSandSpot   = map.nodes.Where(n => n.x == rightSandSpot.x && n.y == rightSandSpot.y).First();
+                    actualNode.obj = '.';
+                    actualNode     = map.nodes.Where(n => n.x == nextSandSpot.x && n.y == nextSandSpot.y).First();
+                    actualNode.obj = 'o';
+    
+                    nextSandSpot = map.nodes.Where(n => n.x == nextSandSpot.x && n.y == nextSandSpot.y + 1).FirstOrDefault();
+                }
+                else 
+                {
+                    isSandResting = true;
+                }   
             }
         }
         else 
@@ -159,6 +204,21 @@ int SandResting(CaveMap map)
             actualNode.obj = '.';
             return (true, map);
         }
+    }
+    return (false, map);
+}
+
+void DrawnMap(CaveMap map, int minX, int maxX, int minY, int maxY) 
+{
+    for (int i = minY; i <= maxY; i++)
+    {
+        for (int j = minX; j <= maxX; j++)
+        {
+            var actualNode = map.nodes.Where(n => n.x == j && n.y == i).First();
+
+            Console.Write(actualNode.obj);
+        }
+        Console.Write('\n');
     }
 }
 #endregion
